@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import { VisionCameraProxy, type Frame, type Point } from 'react-native-vision-camera';
 
 const LINKING_ERROR =
   `The package 'vision-camera-zxing' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,6 +18,20 @@ const VisionCameraZXing = NativeModules.VisionCameraZXing
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return VisionCameraZXing.multiply(a, b);
+const plugin = VisionCameraProxy.initFrameProcessorPlugin('zxing',{})
+
+/**
+ * Detect barcodes from the camera preview
+ */
+export function zxing(frame: Frame):Record<string, Result>|undefined {
+  'worklet'
+  if (plugin == null) throw new Error('Failed to load Frame Processor Plugin "zxing"!')
+  return plugin.call(frame) as any;
+}
+
+export interface Result {
+  barcodeText:string;
+  barcodeFormat:string;
+  barcodeBytesBase64:string;
+  points:Point[]
 }

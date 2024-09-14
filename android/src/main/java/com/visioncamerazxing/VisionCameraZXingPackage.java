@@ -14,7 +14,7 @@ import java.util.List;
 
 public class VisionCameraZXingPackage implements ReactPackage {
   static {
-    FrameProcessorPluginRegistry.addFrameProcessorPlugin("zxing", CropperFrameProcessorPlugin::new);
+    FrameProcessorPluginRegistry.addFrameProcessorPlugin("zxing", ZXingFrameProcessorPlugin::new);
   }
   @NonNull
   @Override
