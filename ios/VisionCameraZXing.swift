@@ -20,34 +20,63 @@ class VisionCameraZXing: NSObject {
         resolve(returned_results)
     }
     
-    static func getBase64FromBytesArray(result:ZXResult) -> String {
-        if result.rawBytes != nil {
-            let bytes = result.rawBytes
-            for index in 0...bytes!.length {
-                print(bytes!.array[Int(index)])
-            }
-        }else{
-            print("bytes is empty")
-        }
-        return ""
-    }
-    
     static func wrapResult(result: ZXResult) -> Any {
         var map: [String: Any] = [:]
         map["barcodeText"] = result.text
-        map["barcodeFormat"] = result.barcodeFormat.rawValue
-        map["barcodeBytesBase64"] = VisionCameraZXing.getBase64FromBytesArray(result: result)
+        map["barcodeFormat"] = nameForBarcodeFormat(result.barcodeFormat)
+        map["barcodeBytesBase64"] = ""
         var convertedPoints: [[String:CGFloat]] = []
-        let points = result.resultPoints as! [CGPoint]
+        let points = result.resultPoints as! [ZXResultPoint]
 
         for point in points {
             var pointDict: [String:CGFloat] = [:]
-            pointDict["x"] = point.x
-            pointDict["y"] = point.y
+            pointDict["x"] = CGFloat(point.x)
+            pointDict["y"] = CGFloat(point.y)
             convertedPoints.append(pointDict)
         }
-        map["points"] = points
+        map["points"] = convertedPoints
         return map
+    }
+    
+    static func nameForBarcodeFormat(_ format: ZXBarcodeFormat) -> String {
+        switch format {
+        case kBarcodeFormatAztec:
+            return "Aztec"
+        case kBarcodeFormatCodabar:
+            return "Codabar"
+        case kBarcodeFormatCode39:
+            return "Code 39"
+        case kBarcodeFormatCode93:
+            return "Code 93"
+        case kBarcodeFormatCode128:
+            return "Code 128"
+        case kBarcodeFormatDataMatrix:
+            return "Data Matrix"
+        case kBarcodeFormatEan8:
+            return "EAN-8"
+        case kBarcodeFormatEan13:
+            return "EAN-13"
+        case kBarcodeFormatITF:
+            return "ITF"
+        case kBarcodeFormatMaxiCode:
+            return "MaxiCode"
+        case kBarcodeFormatPDF417:
+            return "PDF417"
+        case kBarcodeFormatQRCode:
+            return "QR Code"
+        case kBarcodeFormatRSS14:
+            return "RSS 14"
+        case kBarcodeFormatRSSExpanded:
+            return "RSS Expanded"
+        case kBarcodeFormatUPCA:
+            return "UPC-A"
+        case kBarcodeFormatUPCE:
+            return "UPC-E"
+        case kBarcodeFormatUPCEANExtension:
+            return "UPC/EAN extension"
+        default:
+            return "Unknown"
+        }
     }
     
     static public func convertBase64ToImage(_ imageStr:String) ->UIImage?{
