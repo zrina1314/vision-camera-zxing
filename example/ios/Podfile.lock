@@ -1634,6 +1634,7 @@ DEPENDENCIES:
   - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - VisionCameraZXing (from `../..`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
+  - ZXingObjC
 
 SPEC REPOS:
   trunk:
@@ -1848,6 +1849,6 @@ SPEC CHECKSUMS:
   Yoga: 4ef80d96a5534f0e01b3055f17d1e19a9fc61b63
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 8127eaa644764766c8f65a9af35aedd2487daed6
+PODFILE CHECKSUM: 220d8264ddfdad6b635acdf49e05788c7d930852
 
 COCOAPODS: 1.15.2
