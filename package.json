@@ -1,6 +1,6 @@
 {
   "name": "vision-camera-zxing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A barcode reading frame processor plugin for Vision Camera using ZXing",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
