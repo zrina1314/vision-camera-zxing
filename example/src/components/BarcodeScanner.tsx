@@ -10,18 +10,37 @@ interface props {
 const BarcodeScanner: React.FC<props> = (props: props) => {
   const [hasPermission, setHasPermission] = React.useState(false);
   const [isActive, setIsActive] = React.useState(false);
+  const [barcodeResults, setBarcodeResults] = React.useState([] as Result[]);
   const device = useCameraDevice("back");
   const cameraFormat = useCameraFormat(device, [
     { videoResolution: { width: 1280, height: 720 } },
     { fps: 60 }
   ])
+  const convertAndSetResults = (results:Record<string,object>) => {
+    const keys = Object.keys(results);
+    const converted:Result[] = [];
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index];
+      if (key) {
+        const result = results[key]
+        converted.push(result as Result);
+      }
+    }
+    setBarcodeResults(converted);
+  }
+  const convertAndSetResultsJS = Worklets.createRunOnJS(convertAndSetResults);
+  React.useEffect(() => {
+    if (props.onScanned && barcodeResults.length>0) {
+      props.onScanned(barcodeResults);
+    }
+  },[barcodeResults])
   const frameProcessor = useFrameProcessor(frame => {
     'worklet'
     runAsync(frame, () => {
       'worklet'
       const results = zxing(frame);
-      console.log("decode");
       console.log(results);
+      convertAndSetResultsJS(results);
     })
   }, [])
 

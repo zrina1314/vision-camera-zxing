@@ -23,7 +23,7 @@ const plugin = VisionCameraProxy.initFrameProcessorPlugin('zxing',{})
 /**
  * Detect barcodes from the camera preview
  */
-export function zxing(frame: Frame):Record<string, Result>|undefined {
+export function zxing(frame: Frame):Record<string, Result> {
   'worklet'
   if (plugin == null) throw new Error('Failed to load Frame Processor Plugin "zxing"!')
   return plugin.call(frame) as any;
