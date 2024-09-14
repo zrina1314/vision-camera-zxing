@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
-import { Camera, runAsync, useCameraDevice, useCameraFormat, useFrameProcessor } from 'react-native-vision-camera';
+import { Dimensions, StyleSheet } from 'react-native';
+import { Camera, runAsync, useCameraDevice, useCameraFormat, useFrameProcessor, type Orientation } from 'react-native-vision-camera';
 import { zxing, type Result } from 'vision-camera-zxing';
 import { Worklets } from 'react-native-worklets-core';
 import { Polygon, Svg, Text as SVGText } from 'react-native-svg';
@@ -11,20 +11,43 @@ interface props {
 const BarcodeScanner: React.FC<props> = (props: props) => {
   const [hasPermission, setHasPermission] = React.useState(false);
   const [isActive, setIsActive] = React.useState(false);
+  const [viewBox, setViewBox] = React.useState("0 0 720 1280");
   const [barcodeResults, setBarcodeResults] = React.useState([] as Result[]);
   const device = useCameraDevice("back");
   const cameraFormat = useCameraFormat(device, [
     { videoResolution: { width: 1280, height: 720 } },
     { fps: 60 }
   ])
-  const convertAndSetResults = (results:Record<string,object>) => {
+  const rotatePoints = (result:Result,_frameWidth:number,frameHeight:number,orientation:Orientation) => {
+    for (let index = 0; index < result.points.length; index++) {
+      const point = result.points[index];
+      if (point) {
+        if (orientation === "landscape-right") {
+          let x = point.x;
+          point.x = frameHeight - point.y;
+          point.y = x;
+        }
+      }
+    }
+  };
+
+  const convertAndSetResults = (results:Record<string,object>,frameWidth:number,frameHeight:number,orientation:Orientation) => {
     const keys = Object.keys(results);
+    const rotated = HasRotation(frameWidth,frameHeight);
+    if (rotated) {
+      setViewBox("0 0 "+frameHeight+" "+frameWidth);
+    }else{
+      setViewBox("0 0 "+frameWidth+" "+frameHeight);
+    }
     const converted:Result[] = [];
     for (let index = 0; index < keys.length; index++) {
       const key = keys[index];
       if (key) {
-        const result = results[key]
-        converted.push(result as Result);
+        const result = results[key] as Result;
+        if (rotated) {
+          rotatePoints(result,frameWidth,frameHeight,orientation);
+        }
+        converted.push(result);
       }
     }
     setBarcodeResults(converted);
@@ -35,13 +58,30 @@ const BarcodeScanner: React.FC<props> = (props: props) => {
       props.onScanned(barcodeResults);
     }
   },[barcodeResults])
+
+  const HasRotation = (frameWidth:number,frameHeight:number) => {
+    let rotated = false;
+    if (frameWidth>frameHeight){
+      if (Dimensions.get('window').width<Dimensions.get('window').height) {
+        console.log("Has rotation");
+        rotated = true
+      }
+    }else if (frameWidth<frameHeight) {
+      if (Dimensions.get('window').width>Dimensions.get('window').height) {
+        console.log("Has rotation");
+        rotated = true
+      }
+    }
+    return rotated;
+  }
+
   const frameProcessor = useFrameProcessor(frame => {
     'worklet'
     runAsync(frame, () => {
       'worklet'
       const results = zxing(frame);
       console.log(results);
-      convertAndSetResultsJS(results);
+      convertAndSetResultsJS(results,frame.width,frame.height,frame.orientation);
     })
   }, [])
 
@@ -80,7 +120,7 @@ const BarcodeScanner: React.FC<props> = (props: props) => {
             />
             <Svg style={StyleSheet.absoluteFill} 
               preserveAspectRatio="xMidYMid slice"
-              viewBox="0 0 720 1280">
+              viewBox={viewBox}>
               {barcodeResults.map((barcode, idx) => (
                 <Polygon key={"poly-"+idx}
                   points={getPointsData(barcode)}
