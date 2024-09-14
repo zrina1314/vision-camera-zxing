@@ -29,6 +29,12 @@ public class ZXingFrameProcessorPlugin extends FrameProcessorPlugin {
   @Override
   public Object callback(@NonNull Frame frame, @Nullable Map<String, Object> arguments) {
     List<Object> array = new ArrayList<>();
+    Boolean multiple = false;
+    if (arguments != null) {
+      if (arguments.containsKey("multiple")) {
+        multiple = (Boolean) arguments.get("multiple");
+      }
+    }
     try {
       ByteBuffer buffer = frame.getImage().getPlanes()[0].getBuffer();
       int length = buffer.remaining();
@@ -45,13 +51,17 @@ public class ZXingFrameProcessorPlugin extends FrameProcessorPlugin {
         false
       );
       BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(source));
-      Result barcodeResult = null;
       try {
-        barcodeResult = VisionCameraZXingModule.decodeBinaryBitmap(binaryBitmap);
-      } catch (NotFoundException e) {}
-      if (barcodeResult != null) {
-        array.add(Utils.wrapResults(barcodeResult).toHashMap());
-      }
+        if (multiple) {
+          Result[] results = VisionCameraZXingModule.decodeBinaryBitmapMultiple(binaryBitmap);
+          for (Result result:results) {
+            array.add(Utils.wrapResults(result).toHashMap());
+          }
+        }else{
+          Result result = VisionCameraZXingModule.decodeBinaryBitmap(binaryBitmap);
+          array.add(Utils.wrapResults(result).toHashMap());
+        }
+      }catch (NotFoundException e){}
     } catch (FrameInvalidError e) {
       throw new RuntimeException(e);
     }

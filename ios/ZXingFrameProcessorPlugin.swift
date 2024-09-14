@@ -28,11 +28,24 @@ public class ZXingFrameProcessorPlugin: FrameProcessorPlugin {
         print("Failed to create bitmap from image.")
         return returned_results
     }
+    var multiple = false;
+    if arguments != nil {
+      if arguments?["multiple"] != nil {
+          multiple = arguments?["multiple"] as! Bool
+      }
+    }
     let source:ZXCGImageLuminanceSource = ZXCGImageLuminanceSource.init(cgImage: cgImage)
     let bitmap:ZXBinaryBitmap = ZXBinaryBitmap.binaryBitmap(with: ZXHybridBinarizer.init(source: source)) as! ZXBinaryBitmap
     do {
-        let result = try VisionCameraZXing.reader.decode(bitmap)
-        returned_results.append(VisionCameraZXing.wrapResult(result: result))
+        if multiple {
+            let results = try VisionCameraZXing.multipleReader.decodeMultiple(bitmap)
+            for result in results {
+                returned_results.append(VisionCameraZXing.wrapResult(result: result as! ZXResult))
+            }
+        }else{
+            let result = try VisionCameraZXing.reader.decode(bitmap)
+            returned_results.append(VisionCameraZXing.wrapResult(result: result))
+        }
     }
     catch{}
     return returned_results

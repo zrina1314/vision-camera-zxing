@@ -79,7 +79,7 @@ const BarcodeScanner: React.FC<props> = (props: props) => {
     'worklet'
     runAsync(frame, () => {
       'worklet'
-      const results = zxing(frame);
+      const results = zxing(frame,{multiple:true});
       console.log(results);
       convertAndSetResultsJS(results,frame.width,frame.height,frame.orientation);
     })

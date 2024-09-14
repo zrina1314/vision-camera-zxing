@@ -30,7 +30,7 @@ export default function App() {
     if (response && response.assets) {
       if (response.assets[0]!.base64) {
         console.log(response.assets[0]!.base64);
-        let results = await decodeBase64(response.assets[0]!.base64);
+        let results = await decodeBase64(response.assets[0]!.base64,{multiple:true});
         console.log(results);
         setBarcodeResults(results);
       }

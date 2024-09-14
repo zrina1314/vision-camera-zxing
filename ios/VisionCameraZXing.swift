@@ -3,17 +3,29 @@ import ZXingObjC
 @objc(VisionCameraZXing)
 class VisionCameraZXing: NSObject {
     static var reader: ZXMultiFormatReader = ZXMultiFormatReader()
-    @objc(decodeBase64:withResolver:withRejecter:)
-    func decodeBase64(base64:String,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+    static var multipleReader: ZXGenericMultipleBarcodeReader = ZXGenericMultipleBarcodeReader(delegate: reader)
+    @objc(decodeBase64:config:withResolver:withRejecter:)
+    func decodeBase64(base64:String,config:[String:Any],resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
         var returned_results: [Any] = []
+        var multiple = false
+        if config["multiple"] != nil {
+            multiple = config["multiple"] as! Bool
+        }
         let image = VisionCameraZXing.convertBase64ToImage(base64)
         if image != nil {
             let imageToDecode = image?.cgImage  // Given a CGImage in which we are looking for barcodes
             let source:ZXCGImageLuminanceSource = ZXCGImageLuminanceSource.init(cgImage: imageToDecode)
             let bitmap:ZXBinaryBitmap = ZXBinaryBitmap.binaryBitmap(with: ZXHybridBinarizer.init(source: source)) as! ZXBinaryBitmap
             do {
-                let result = try VisionCameraZXing.reader.decode(bitmap)
-                returned_results.append(VisionCameraZXing.wrapResult(result: result))
+                if multiple {
+                    let results = try VisionCameraZXing.multipleReader.decodeMultiple(bitmap)
+                    for result in results {
+                        returned_results.append(VisionCameraZXing.wrapResult(result: result as! ZXResult))
+                    }
+                }else{
+                    let result = try VisionCameraZXing.reader.decode(bitmap)
+                    returned_results.append(VisionCameraZXing.wrapResult(result: result))
+                }
             }
             catch{}
         }

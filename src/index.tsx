@@ -23,17 +23,29 @@ const plugin = VisionCameraProxy.initFrameProcessorPlugin('zxing',{})
 /**
  * Detect barcodes from the camera preview
  */
-export function zxing(frame: Frame):Record<string, Result> {
+export function zxing(frame: Frame,config?:ScanConfig):Record<string, Result> {
   'worklet'
   if (plugin == null) throw new Error('Failed to load Frame Processor Plugin "zxing"!')
-  return plugin.call(frame) as any;
+  if (config) {
+    let record:Record<string,any> = {};
+    if (config.multiple != undefined && config.multiple != null) {
+      record["multiple"] = config.multiple;
+    }
+    return plugin.call(frame,record) as any;
+  }else{
+    return plugin.call(frame) as any;
+  }
 }
 
 /**
  * Detect barcodes from base64
  */
-export function decodeBase64(base64:string): Promise<Result[]> {
-  return VisionCameraZXing.decodeBase64(base64);
+export function decodeBase64(base64:string,config?:ScanConfig): Promise<Result[]> {
+  return VisionCameraZXing.decodeBase64(base64,config);
+}
+
+export interface ScanConfig {
+  multiple?:boolean
 }
 
 export interface Result {
