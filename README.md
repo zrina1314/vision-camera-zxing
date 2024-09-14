@@ -31,14 +31,14 @@ module.exports = {
    // ...
    const frameProcessor = useFrameProcessor((frame) => {
      'worklet';
-     const barcodes = zxing(frame);
+     const barcodes = zxing(frame,{multiple:true});
    }, []);
    ```
    
 2. Scan barcodes from a base64-encoded static image.
 
    ```ts
-   let results = await decodeBase64(base64);
+   let results = await decodeBase64(base64,{multiple:true});
    ```
 
 ## Limitation
