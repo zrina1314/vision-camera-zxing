@@ -13,15 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Utils {
-  public static Map<String, Object> wrapResults(Result result) {
-    Map<String, Object> map = new HashMap<>();
-    map.put("barcodeText",result.getText());
-    map.put("barcodeFormat",result.getBarcodeFormat().name());
+  public static WritableNativeMap wrapResults(Result result) {
+    WritableNativeMap map = new WritableNativeMap();
+    map.putString("barcodeText",result.getText());
+    map.putString("barcodeFormat",result.getBarcodeFormat().name());
     byte[] bytes = result.getRawBytes();
     if (bytes != null) {
-      map.put("barcodeBytesBase64", Base64.encodeToString(bytes,Base64.DEFAULT));
+      map.putString("barcodeBytesBase64", Base64.encodeToString(bytes,Base64.DEFAULT));
     }else{
-      map.put("barcodeBytesBase64", "");
+      map.putString("barcodeBytesBase64", "");
     }
     ResultPoint[] points = null;
     try {
@@ -36,7 +36,7 @@ public class Utils {
         pointsArray.pushMap(pointAsMap);
       }
     }
-    map.put("points",pointsArray.toArrayList());
+    map.putArray("points",pointsArray);
     return map;
   }
 }

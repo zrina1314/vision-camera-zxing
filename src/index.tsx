@@ -29,6 +29,13 @@ export function zxing(frame: Frame):Record<string, Result>|undefined {
   return plugin.call(frame) as any;
 }
 
+/**
+ * Detect barcodes from base64
+ */
+export function decodeBase64(base64:string): Promise<Result[]> {
+  return VisionCameraZXing.decodeBase64(base64);
+}
+
 export interface Result {
   barcodeText:string;
   barcodeFormat:string;

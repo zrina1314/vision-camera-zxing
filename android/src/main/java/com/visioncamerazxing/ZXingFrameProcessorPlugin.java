@@ -50,7 +50,7 @@ public class ZXingFrameProcessorPlugin extends FrameProcessorPlugin {
         barcodeResult = VisionCameraZXingModule.decodeBinaryBitmap(binaryBitmap);
       } catch (NotFoundException e) {}
       if (barcodeResult != null) {
-        array.add(Utils.wrapResults(barcodeResult));
+        array.add(Utils.wrapResults(barcodeResult).toHashMap());
       }
     } catch (FrameInvalidError e) {
       throw new RuntimeException(e);
